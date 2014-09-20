@@ -9,7 +9,7 @@
 /**
  * Description of CODPincode
  *
- * @author Admin
+ * @author Satz
  */
 if (!defined('_PS_VERSION_'))
     exit;
@@ -36,7 +36,7 @@ class CODPincode extends PaymentModuleCore {
         parent::__construct();
 
         if (!$dontTranslate) {
-            $this->displayName = $this->l('COD Availability');
+            $this->displayName = $this->l('COD(Cash on Delivery)');
             $this->description = $this->l('COD Avialability based on pincode');
         }
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -64,8 +64,6 @@ class CODPincode extends PaymentModuleCore {
     }
 
     public function hookExtraLeft($params) {
-
-
         return $this->display(__FILE__, 'cod_pincode.tpl');
     }
 
@@ -274,7 +272,7 @@ class CODPincode extends PaymentModuleCore {
                                        
 					$order->total_paid_tax_excl = (float)Tools::ps_round((float)$this->context->cart->getOrderTotal(false, Cart::BOTH, $order->product_list, $id_carrier), 2)+$cod;
 					$order->total_paid_tax_incl = (float)Tools::ps_round((float)$this->context->cart->getOrderTotal(true, Cart::BOTH, $order->product_list, $id_carrier), 2)+$cod;
-					$order->total_paid = $order->total_paid_tax_incl+$cod;
+					$order->total_paid = $order->total_paid_tax_incl;
 
 					$order->invoice_date = '0000-00-00 00:00:00';
 					$order->delivery_date = '0000-00-00 00:00:00';

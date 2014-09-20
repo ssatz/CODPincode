@@ -26,7 +26,11 @@
 <p class="payment_module">
 	<a href="{$link->getModuleLink('CODPincode', 'validation', [], true)|escape:'html'}" title="{l s='Pay with cash on delivery (COD)' mod='CODPincode'}" rel="nofollow">
 		<img src="{$this_path_cod}cashondelivery.gif" alt="{l s='Pay with cash on delivery (COD)' mod='CODPincode'}" style="float:left;" />		
-                <br />{l s='Pay with cash on delivery (COD) ' mod='CODPincode'}
+                <br />{l s='Pay with cash on delivery (COD)' mod='CODPincode'}
+                
+                {if $this_cod_fee> 0}
+                 +  {convertPrice price=$this_cod_fee}
+                {/if}    
 		<br />{l s='You pay for the merchandise upon delivery' mod='CODPincode'}
 		<br style="clear:both;" />
 	</a>
