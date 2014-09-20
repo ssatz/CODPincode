@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>CODPincode</name>
+	<displayName><![CDATA[COD Availability]]></displayName>
+	<version><![CDATA[1]]></version>
+	<description><![CDATA[COD Avialability based on pincode]]></description>
+	<author><![CDATA[satz]]></author>
+	<tab><![CDATA[payments_gateways]]></tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
