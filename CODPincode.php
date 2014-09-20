@@ -1,11 +1,4 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Description of CODPincode
  *
@@ -42,7 +35,18 @@ class CODPincode extends PaymentModuleCore {
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
-    public function install() {
+    public function install() {      
+        Db::getInstance()->execute('
+		CREATE TABLE '._DB_PREFIX_.'pincode (
+		`id_pincode` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+		`pincode` BIGINT UNSIGNED NOT NULL ,
+		`id_carrier` INT UNSIGNED NOT NULL ,
+		`date_add` DATETIME NOT NULL,
+		 INDEX `date_add`(`date_add`),
+		 INDEX `id_pincode`(`id_pincode`),
+                 FOREIGN KEY (id_carrier) REFERENCES '._DB_PREFIX_.'carrier(id_carrier)
+		) ENGINE='._MYSQL_ENGINE_);
+        
         foreach ($this->conf_keys as $key)
             Configuration::updateValue($key, 0);
         return (
@@ -54,6 +58,7 @@ class CODPincode extends PaymentModuleCore {
     }
 
     public function uninstall() {
+        Db::getInstance()->execute('DROP TABLE '._DB_PREFIX_.'pincode');
         foreach ($this->conf_keys as $key)
             Configuration::deleteByName($key);
         return (parent::uninstall() &&
@@ -66,7 +71,14 @@ class CODPincode extends PaymentModuleCore {
     public function hookExtraLeft($params) {
         return $this->display(__FILE__, 'cod_pincode.tpl');
     }
-
+    public function hookHeader($params)
+	{
+		$this->page_name = Dispatcher::getInstance()->getController();
+		if ($this->page_name == 'product')
+		{			
+			$this->context->controller->addJS($this->_path.'js/pincode.js');
+		}
+	}
     public function hookPayment($params) {
         if (!$this->active)
             return;
@@ -99,8 +111,7 @@ class CODPincode extends PaymentModuleCore {
     public function hookPaymentReturn($params) {
         if (!$this->active)
             return;
-        
-        
+   
         return $this->display(__FILE__, 'confirmation.tpl');
     }
     public function validateOrder($id_cart, $id_order_state, $amount_paid, $payment_method = 'Unknown',
@@ -888,5 +899,6 @@ class CODPincode extends PaymentModuleCore {
             'COD_FEE' => Tools::getValue('COD_FEE', Configuration::get('COD_FEE')),
         );
     }
+    
 
 }
