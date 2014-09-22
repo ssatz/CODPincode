@@ -27,6 +27,7 @@ class CODPincode extends PaymentModuleCore {
         );
 
         parent::__construct();
+        require_once(dirname(__FILE__).'/pincode/CSVReader.php');
 
         if (!$dontTranslate) {
             $this->displayName = $this->l('COD(Cash on Delivery)');
@@ -35,7 +36,7 @@ class CODPincode extends PaymentModuleCore {
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
-    public function install() {      
+    public function install() {
         Db::getInstance()->execute('
 		CREATE TABLE '._DB_PREFIX_.'pincode (
 		`id_pincode` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
@@ -46,7 +47,7 @@ class CODPincode extends PaymentModuleCore {
 		 INDEX `id_pincode`(`id_pincode`),
                  FOREIGN KEY (id_carrier) REFERENCES '._DB_PREFIX_.'carrier(id_carrier)
 		) ENGINE='._MYSQL_ENGINE_);
-        
+
         foreach ($this->conf_keys as $key)
             Configuration::updateValue($key, 0);
         return (
@@ -75,7 +76,7 @@ class CODPincode extends PaymentModuleCore {
 	{
 		$this->page_name = Dispatcher::getInstance()->getController();
 		if ($this->page_name == 'product')
-		{			
+		{
 			$this->context->controller->addJS($this->_path.'js/pincode.js');
 		}
 	}
@@ -111,7 +112,7 @@ class CODPincode extends PaymentModuleCore {
     public function hookPaymentReturn($params) {
         if (!$this->active)
             return;
-   
+
         return $this->display(__FILE__, 'confirmation.tpl');
     }
     public function validateOrder($id_cart, $id_order_state, $amount_paid, $payment_method = 'Unknown',
@@ -120,7 +121,7 @@ class CODPincode extends PaymentModuleCore {
 	{
 		if (self::DEBUG_MODE)
 			PrestaShopLogger::addLog('PaymentModule::validateOrder - Function called', 1, null, 'Cart', (int)$id_cart, true);
-	
+
 		$this->context->cart = new Cart($id_cart);
 		$this->context->customer = new Customer($this->context->cart->id_customer);
 		$this->context->language = new Language($this->context->cart->id_lang);
@@ -280,7 +281,7 @@ class CODPincode extends PaymentModuleCore {
 					$order->total_wrapping_tax_excl = (float)abs($this->context->cart->getOrderTotal(false, Cart::ONLY_WRAPPING, $order->product_list, $id_carrier));
 					$order->total_wrapping_tax_incl = (float)abs($this->context->cart->getOrderTotal(true, Cart::ONLY_WRAPPING, $order->product_list, $id_carrier));
 					$order->total_wrapping = $order->total_wrapping_tax_incl;
-                                       
+
 					$order->total_paid_tax_excl = (float)Tools::ps_round((float)$this->context->cart->getOrderTotal(false, Cart::BOTH, $order->product_list, $id_carrier), 2)+$cod;
 					$order->total_paid_tax_incl = (float)Tools::ps_round((float)$this->context->cart->getOrderTotal(true, Cart::BOTH, $order->product_list, $id_carrier), 2)+$cod;
 					$order->total_paid = $order->total_paid_tax_incl;
@@ -290,7 +291,7 @@ class CODPincode extends PaymentModuleCore {
 
 					if (self::DEBUG_MODE)
 						PrestaShopLogger::addLog('PaymentModule::validateOrder - Order is about to be added', 1, null, 'Cart', (int)$id_cart, true);
-			
+
 					// Creating order
 					$result = $order->add();
 
@@ -774,13 +775,21 @@ class CODPincode extends PaymentModuleCore {
         $ok = null;
 
         if (Tools::isSubmit('submitShipping')) {
-            $shipping = Tools::getValue('SHIPPING_METHOD');
-            if (isset($shipping) && Validate::isCarrierName((string) $shipping)) {
-                Configuration::updateValue('SHIPPING_METHOD', (string) $shipping);
-                $ok = true;
-            } else {
-                $this->_html .= $this->displayError($this->l('Error occurred during Shipping Pincode update'));
+            $handle = new CSVReader(Tools::getValue("filename"),$_FILES['PINCODE_UPLOAD']['tmp_name']);
+            if($handle->iscsvUpload()){
+               $handle->getRows();
+                $shipping = Tools::getValue('SHIPPING_METHOD');
+                if (isset($shipping) && Validate::isCarrierName((string) $shipping)) {
+                    Configuration::updateValue('SHIPPING_METHOD', (string) $shipping);
+                    $ok = true;
+                } else {
+                    $this->_html .= $this->displayError($this->l('Error occurred during Shipping Pincode update'));
+                }
             }
+            else{
+                $this->_html .= $this->displayError(CSVconst::UPLOAD_ERROR);
+            }
+
         } else if (Tools::isSubmit('submitCOD')) {
             $cod_min = Tools::getValue('COD_MINIMUM_AMOUNT');
             $cod_fee = Tools::getValue('COD_FEE');
@@ -819,6 +828,7 @@ class CODPincode extends PaymentModuleCore {
                     'title' => $this->l('Upload PinCode'),
                     'icon' => 'icon-cogs'
                 ),
+                'enctype'=>'multipart/form-data',
                 'input' => array(
                     array(
                         'type' => 'select', // This is a <select> tag.
@@ -832,6 +842,12 @@ class CODPincode extends PaymentModuleCore {
                             'name' => 'name'                               // The value of the 'name' key must be the same as the key for the text content of the <option> tag in each $options sub-array.
                         )
                     ),
+                    array(
+                        'type'=>'file',
+                         'label'=>$this->l('Upload CSV'),
+                         'name'=>'PINCODE_UPLOAD',
+                         'required'=>true,
+                    )
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
