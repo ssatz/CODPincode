@@ -7,10 +7,20 @@
 if (!defined('_PS_VERSION_'))
     exit;
 
+/**
+ * Class CODPincode
+ */
 class CODPincode extends PaymentModuleCore {
 
+    /**
+     * Html string
+     * @var string
+     */
     protected $_html;
 
+    /**
+     * @param bool $dontTranslate
+     */
     function __construct($dontTranslate = false) {
         $this->name = 'CODPincode';
         $this->version = '1';
@@ -36,6 +46,9 @@ class CODPincode extends PaymentModuleCore {
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
+    /**
+     * @return bool
+     */
     public function install() {
         Db::getInstance()->execute('
 		CREATE TABLE '._DB_PREFIX_.'pincode (
@@ -58,6 +71,9 @@ class CODPincode extends PaymentModuleCore {
                 $this->registerHook('header'));
     }
 
+    /**
+     * @return bool
+     */
     public function uninstall() {
         Db::getInstance()->execute('DROP TABLE '._DB_PREFIX_.'pincode');
         foreach ($this->conf_keys as $key)
@@ -69,9 +85,18 @@ class CODPincode extends PaymentModuleCore {
                 $this->unregisterHook('extraLeft'));
     }
 
+    /**
+     * @param $params
+     * @return mixed
+     */
     public function hookExtraLeft($params) {
         return $this->display(__FILE__, 'cod_pincode.tpl');
     }
+
+    /**
+     * Hook Header
+     * @param $params
+     */
     public function hookHeader($params)
 	{
 		$this->page_name = Dispatcher::getInstance()->getController();
@@ -80,6 +105,11 @@ class CODPincode extends PaymentModuleCore {
 			$this->context->controller->addJS($this->_path.'js/pincode.js');
 		}
 	}
+
+    /**
+     * @param $params
+     * @return bool
+     */
     public function hookPayment($params) {
         if (!$this->active)
             return;
@@ -109,12 +139,32 @@ class CODPincode extends PaymentModuleCore {
         return $this->display(__FILE__, 'payment.tpl');
     }
 
+    /**
+     * @param $params
+     * @return mixed
+     */
     public function hookPaymentReturn($params) {
         if (!$this->active)
             return;
 
         return $this->display(__FILE__, 'confirmation.tpl');
     }
+
+    /**
+     * Override method
+     * @param int $id_cart
+     * @param int $id_order_state
+     * @param float $amount_paid
+     * @param string $payment_method
+     * @param null $message
+     * @param array $extra_vars
+     * @param null $currency_special
+     * @param bool $dont_touch_amount
+     * @param bool $secure_key
+     * @param Shop $shop
+     * @return bool
+     * @throws PrestaShopException
+     */
     public function validateOrder($id_cart, $id_order_state, $amount_paid, $payment_method = 'Unknown',
 		$message = null, $extra_vars = array(), $currency_special = null, $dont_touch_amount = false,
 		$secure_key = false, Shop $shop = null)
@@ -771,6 +821,10 @@ class CODPincode extends PaymentModuleCore {
 			die($error);
 		}
 	}
+
+    /**
+     * @return string
+     */
     public function getContent() {
         $ok = null;
 
@@ -811,6 +865,9 @@ class CODPincode extends PaymentModuleCore {
         return $this->_html;
     }
 
+    /**
+     * @return mixed
+     */
     private function renderForm() {
 
         $options = array();
@@ -908,6 +965,9 @@ class CODPincode extends PaymentModuleCore {
         return $helper->generateForm(array($fields_form, $fields_form_1));
     }
 
+    /**
+     * @return array
+     */
     private function getConfigFieldsValues() {
         return array(
             'SHIPPING_METHOD' => Tools::getValue('COD_FEE', Configuration::get('SHIPPING_METHOD')),
