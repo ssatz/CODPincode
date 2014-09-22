@@ -814,7 +814,7 @@ class CODPincode extends PaymentModuleCore {
     private function renderForm() {
 
         $options = array();
-        foreach (CarrierCore::getCarriers((int) Context::getContext()->language->id, true, true) as $carrier) {
+        foreach (CarrierCore::getCarriers((int) Context::getContext()->language->id, true, false) as $carrier) {
 
             $options[] = array(
                 "id" => $carrier['id_carrier'],
