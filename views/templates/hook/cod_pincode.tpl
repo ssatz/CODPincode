@@ -12,9 +12,9 @@
                     <input type="submit" name="codcheck" value="{l s='send' mod='CODPincode'}" class="btn btn-success codpincode" />						
                 </p>
             </div>
-            <div class="alert alert-dismissible" role="alert" id="msg" style="display: none">
-               <!-- <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>-->
-                
+            <div class="alert alert-dismissible"  id="msg" style="display: none">
+                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <span class="msgd"></span>
             </div>
         </fieldset>
     </form>

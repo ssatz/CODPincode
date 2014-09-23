@@ -65,7 +65,7 @@ class CODPincode extends PaymentModuleCore {
             Configuration::updateValue($key, 0);
         return (
                 parent::install() &&
-                $this->registerHook('extraLeft') &&
+                $this->registerHook('extraRight') &&
                 $this->registerHook('payment') &&
                 $this->registerHook('paymentReturn') &&
                 $this->registerHook('header'));
@@ -82,14 +82,14 @@ class CODPincode extends PaymentModuleCore {
                 $this->unregisterHook('header') &&
                 $this->unregisterHook('payment') &&
                 $this->unregisterHook('paymentReturn') &&
-                $this->unregisterHook('extraLeft'));
+                $this->unregisterHook('extraRight'));
     }
 
     /**
      * @param $params
      * @return mixed
      */
-    public function hookExtraLeft($params) {
+    public function hookExtraRight($params) {
         return $this->display(__FILE__, 'cod_pincode.tpl');
     }
 

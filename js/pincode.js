@@ -4,6 +4,11 @@
  */
 
 $(document).ready(function() {
+    $('body').on('click','.close',function(){
+        var $that = $(this);
+        $that.parents("#msg").fadeOut();
+    });
+
     $('body').on('click', '.codpincode', function(e) {
         e.preventDefault();
         var $cod = $(this).closest("form").find("input[name='codpincode']").val();
@@ -20,12 +25,12 @@ $(document).ready(function() {
                     .done(function(json) {
                       var $parse=JSON.parse(json);  
                       if($parse.result===false){
-                       $($div).addClass('alert-warning').fadeIn();
-                       $($div).append($parse.msg);
+                       $($div).addClass('alert-warning').removeClass('alert-success').fadeIn();
+                       $($div).find('.msgd').text($parse.msg);
                       }
                       else{
-                          $($div).addClass('alert-success').fadeIn();
-                       $($div).append($parse.msg); 
+                          $($div).addClass('alert-success').removeClass('alert-warning').fadeIn();
+                       $($div).find('.msgd').text($parse.msg);
                       }
                     })
                     .fail(function(jqxhr, textStatus, error) {
