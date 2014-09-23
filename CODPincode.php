@@ -831,10 +831,10 @@ class CODPincode extends PaymentModuleCore {
         if (Tools::isSubmit('submitShipping')) {
             $handle = new CSVReader(Tools::getValue("filename"),$_FILES['PINCODE_UPLOAD']['tmp_name']);
             if($handle->iscsvUpload()){
-               $handle->getRows();
                 $shipping = Tools::getValue('SHIPPING_METHOD');
                 if (isset($shipping) && Validate::isCarrierName((string) $shipping)) {
                     Configuration::updateValue('SHIPPING_METHOD', (string) $shipping);
+                    $this->updateCODPincode($handle->getRows(),$shipping);
                     $ok = true;
                 } else {
                     $this->_html .= $this->displayError($this->l('Error occurred during Shipping Pincode update'));
@@ -976,5 +976,13 @@ class CODPincode extends PaymentModuleCore {
         );
     }
     
-
+    private function updateCODPincode($pincode,$carrier)
+    {
+        $a=date("Y-m-d H:i:s");
+        DB::getInstance()->insert('pincode',array(
+            'pincode'=>$pincode,
+            'id_carrier'=>$carrier,
+            'date_add'=>$a
+        ));
+    }
 }

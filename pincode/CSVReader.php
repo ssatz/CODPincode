@@ -54,8 +54,9 @@ class CSVReader {
     {
         $data = array();
         while ($row = $this->csvFileobj->fgetcsv($this->delimiter)) {
-            $data[] = (int)$row;
+            $data[] =$row;
         };
+
         return $data;
     }
 
